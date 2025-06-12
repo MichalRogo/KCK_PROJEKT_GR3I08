@@ -196,6 +196,30 @@ function App() {
         <button onClick={() => soundManager.play('menu')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
           Ustawienia
         </button>
+        <div style={{ marginTop: '20px', padding: '10px', border: '2px solid #77004d', borderRadius: '8px' }}>
+        <label style={{ color: '#d600cb', display: 'block', marginBottom: '10px' }}>Volume Test</label>
+        <input 
+          type="range" 
+          min="0" 
+          max="100" 
+          defaultValue="70"
+          onChange={(e) => soundManager.setVolume(e.target.value / 100)}
+          style={{ width: '100%', marginBottom: '10px' }}
+        />
+        <button 
+          onClick={() => soundManager.play('select')}
+          style={{ 
+            background: 'black', 
+            border: '2px solid #77004d', 
+            color: '#d600cb', 
+            padding: '5px 10px',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Test Sound
+        </button>
+      </div>
         {message && <div className="message">{message}</div>}
       </div>
     </div>
