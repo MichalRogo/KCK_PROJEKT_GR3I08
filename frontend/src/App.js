@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import './App.css';
+import logo from './logo.png'
+// import script from './script'
 
 // ZMIEŃ TEN ADRES NA IP TWOJEJ VM!
-const WEBSOCKET_URL = 'wss://33bf1af02e13735ce0f6beab80deac8d.serveo.net';
+const WEBSOCKET_URL = 'wss://f4a5938f4651254eab8a746a8eebe3a8.serveo.net';
 console.log('WEBSOCKET_URL:', process.env.REACT_APP_WEBSOCKET_URL);
 function App() {
   const [gameState, setGameState] = useState('menu'); // 'menu', 'waiting', 'playing', 'finished'
@@ -137,6 +139,7 @@ function App() {
   };
 
   const submitSolution = () => {
+    //tu dodac jeszcze trzeba
     if (socket && myCode.trim()) {
       socket.send(JSON.stringify({
         type: 'submit_solution',
@@ -163,7 +166,7 @@ function App() {
 
   const renderMenu = () => (
     <div className="menu-container">
-      <h1>Code Battle</h1>
+      <img src={logo} />
       <div className="connection-info">
         <p>Serwer: {WEBSOCKET_URL}</p>
         <p>Status: <span className={`status-${connectionStatus}`}>{connectionStatus}</span></p>
@@ -178,6 +181,9 @@ function App() {
         />
         <button onClick={connectToServer} disabled={connectionStatus === 'connected'}>
           Dołącz do gry
+        </button>
+        <button >
+          Ustawienia
         </button>
         {message && <div className="message">{message}</div>}
       </div>
@@ -196,7 +202,7 @@ function App() {
   const renderGame = () => (
     <div className="game-container">
       <div className="game-header">
-        <h2>Code Battle - vs {opponent}</h2>
+        <h2 className="'headerAnimation">Code Battle - vs {opponent}</h2>
         <div className="task-info">
           <h3>{task?.title}</h3>
           <p>{task?.description}</p>
@@ -217,14 +223,13 @@ function App() {
       <div className="editors-container">
         <div className="editor-section">
           <div className="editor-header">
-            <h4>Twój kod</h4>
-            <button onClick={submitSolution} className="submit-btn">
-              Sprawdź rozwiązanie
-            </button>
+            <h4 style={{color: "#d600cb"}}>Twój kod</h4>
+            
           </div>
-          <div className="editor-wrapper">
+          <div className="editor-wrapper left">
             <Editor
-              height="400px"
+              height="95%"
+              width="70vw"
               defaultLanguage="c"
               value={myCode}
               onChange={updateCode}
@@ -236,16 +241,20 @@ function App() {
                 automaticLayout: true
               }}
             />
+            <button onClick={submitSolution} className="submit-btn">
+              Sprawdź rozwiązanie
+            </button>
           </div>
         </div>
         
         <div className="editor-section">
           <div className="editor-header">
-            <h4>Kod przeciwnika</h4>
+            <h4 style={{color: "#28a745"}}>Kod przeciwnika</h4>
           </div>
-          <div className="editor-wrapper">
+          <div className="editor-wrapper right">
             <Editor
-              height="400px"
+              height="95%"
+              width="20vw"
               defaultLanguage="c"
               value={opponentCode}
               theme="vs-dark"

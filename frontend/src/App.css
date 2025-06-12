@@ -1,12 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Bytesized&family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: "Press Start 2P", system-ui!important;
 }
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #1f0a1f;
   min-height: 100vh;
 }
 
@@ -20,16 +24,18 @@ body {
 
 /* Menu Styles */
 .menu-container {
-  background: white;
+  background: rgb(0, 0, 0);
   padding: 40px;
   border-radius: 15px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  color: white;
   text-align: center;
   min-width: 400px;
+  border: 3px solid #77004d;
+  font-family: "Press Start 2P", system-ui!important;
 }
 
 .connection-info {
-  background: #f8f9fa;
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -69,7 +75,9 @@ body {
 
 .menu-form input {
   padding: 15px;
-  border: 2px solid #e1e1e1;
+  border: 5px solid #77004d;
+  color: #d600cb;
+  background-color: black;
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 0.3s;
@@ -77,23 +85,25 @@ body {
 
 .menu-form input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #d600cb;
 }
 
 .menu-form button {
-  background: linear-gradient(45deg, #667eea, #764ba2);
-  color: white;
-  border: none;
+  background-color: black;
+  border: 5px solid #77004d;
+  color: #77004d;
   padding: 15px;
   border-radius: 8px;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   transition: transform 0.2s;
+  font-family: "Press Start 2P", system-ui!important;
 }
 
 .menu-form button:hover:not(:disabled) {
   transform: translateY(-2px);
+  border-color: #d600cb;
 }
 
 .menu-form button:disabled {
@@ -103,7 +113,9 @@ body {
 
 /* Waiting Styles */
 .waiting-container {
-  background: white;
+   background-color: black;
+  border: 5px solid #77004d;
+  color: #77004d;
   padding: 40px;
   border-radius: 15px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
@@ -112,13 +124,13 @@ body {
 }
 
 .waiting-container h2 {
-  color: #333;
+  color: #d600cb;
   margin-bottom: 30px;
 }
 
 .spinner {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+  border: 4px solid #77004d;
+  border-top: 4px solid #d600cb;
   border-radius: 50%;
   width: 50px;
   height: 50px;
@@ -132,38 +144,45 @@ body {
 }
 
 .waiting-container button {
-  background: #ff6b6b;
-  color: white;
-  border: none;
+  background-color: black;
+  border: 5px solid #77004d;
+  color: #77004d;
   padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
+  transition: .3s;
   margin-top: 20px;
+}
+.waiting-container button:hover{
+  border-color: #d600cb;
 }
 
 /* Game Styles */
 .game-container {
-  width: 100%;
-  max-width: 1400px;
-  background: white;
+  width: 90vw;
+  text-align: center;
+  background: rgb(0, 0, 0);
   border-radius: 15px;
   overflow: hidden;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
 }
 
 .game-header {
-  background: linear-gradient(45deg, #667eea, #764ba2);
-  color: white;
+  background-color: black;
+  color: #d600cb;
   padding: 20px;
   text-align: center;
 }
-
+ /* background-color: black;
+  border: 5px solid #77004d;
+  color: #77004d;
+   border-color: #d600cb; */
 .game-header h2 {
   margin-bottom: 15px;
 }
 
 .task-info {
-  background: rgba(255, 255, 255, 0.1);
+  
   padding: 15px;
   border-radius: 8px;
   margin-top: 15px;
@@ -186,11 +205,11 @@ body {
 
 .test-cases h4 {
   margin-bottom: 10px;
-  color: #fff;
+  color: #77004d;
 }
 
 .test-case {
-  background: rgba(255, 255, 255, 0.15);
+  border-bottom: 3px solid #77004d;
   padding: 8px 12px;
   border-radius: 4px;
   margin: 5px 0;
@@ -208,14 +227,14 @@ body {
 
 .editors-container {
   display: flex;
-  height: 500px;
+  height: 70vh;
 }
 
 .editor-section {
   flex: 1;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #e1e1e1;
+  border-right: 1px solid #000000;
 }
 
 .editor-section:last-child {
@@ -223,7 +242,7 @@ body {
 }
 
 .editor-header {
-  background: #f8f9fa;
+  background: #000000;
   padding: 15px;
   display: flex;
   justify-content: space-between;
@@ -237,23 +256,29 @@ body {
 }
 
 .submit-btn {
-  background: #28a745;
-  color: white;
-  border: none;
+  background: black;
+  color: #77004d;
+  border: 3px solid #77004d;
   padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
+  margin: 5px;
   transition: background-color 0.3s;
 }
 
 .submit-btn:hover {
-  background: #218838;
+  background: #d600cb;
+  border: 3px solid #d600cb;
 }
 
+  /* background-color: black;
+  border: 5px solid #77004d;
+  color: #77004d; */
 .editor-wrapper {
   flex: 1;
   overflow: hidden;
+  
 }
 
 /* Finished Styles */
@@ -323,11 +348,12 @@ body {
 }
 
 .message {
-  background: #e3f2fd;
-  color: #1976d2;
-  border: 1px solid #bbdefb;
+  background: #d600cb;
+  color: black;
 }
-
+.right{
+  filter: blur(4px);
+}
 /* Responsive Design */
 @media (max-width: 768px) {
   .App {
