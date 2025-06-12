@@ -69,6 +69,35 @@ class SoundManager {
       console.warn(`Failed to play ${id}:`, error);
     }
   }
+
+  async loop(id) {
+    let audio = this.sounds[id];
+    if (!audio) {
+      audio = await this.loadSound(id);
+    }
+    
+    if (!audio) return;
+
+    audio.loop = true;
+    audio.volume = this.volume;
+    try {
+      await audio.play();
+      console.log(`Started looping: ${id}`);
+    } catch (error) {
+      console.warn(`Failed to loop ${id}:`, error);
+    }
+  }
+
+  stop(id) {
+    const audio = this.sounds[id];
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.loop = false;
+      console.log(`Stopped: ${id}`);
+    }
+  }
+  
 }
 
 const soundManager = new SoundManager();
