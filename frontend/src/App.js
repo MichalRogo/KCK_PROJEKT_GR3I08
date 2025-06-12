@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import './App.css';
 import logo from './logo.png'
+import soundManager from './soundManager';
 // import script from './script'
 
 // ZMIEŃ TEN ADRES NA IP TWOJEJ VM!
-const WEBSOCKET_URL = 'wss://f4a5938f4651254eab8a746a8eebe3a8.serveo.net';
+const WEBSOCKET_URL = 'ws://192.168.254.103:8765';
 console.log('WEBSOCKET_URL:', process.env.REACT_APP_WEBSOCKET_URL);
 function App() {
   const [gameState, setGameState] = useState('menu'); // 'menu', 'waiting', 'playing', 'finished'
@@ -22,6 +23,7 @@ function App() {
   const socketRef = useRef(null);
 
   useEffect(() => {
+    soundManager.init();
     return () => {
       if (socketRef.current) {
         socketRef.current.close();
@@ -182,7 +184,7 @@ function App() {
         <button onClick={connectToServer} disabled={connectionStatus === 'connected'}>
           Dołącz do gry
         </button>
-        <button >
+        <button onClick={() => soundManager.play('test')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
           Ustawienia
         </button>
         {message && <div className="message">{message}</div>}
