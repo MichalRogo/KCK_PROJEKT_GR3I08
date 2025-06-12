@@ -19,7 +19,8 @@ function App() {
   const [gameResult, setGameResult] = useState(null);
   const [message, setMessage] = useState('');
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
-
+  const [showSoundSettings, setShowSoundSettings] = useState(false);
+  const [volumeValues, setVolumeValues] = useState({master: Math.round(soundManager.getVolume() * 100)});
   const socketRef = useRef(null);
 
   useEffect(() => {
@@ -193,33 +194,12 @@ function App() {
         <button onClick={connectToServer} disabled={connectionStatus === 'connected'}>
           Dołącz do gry
         </button>
-        <button onClick={() => soundManager.play('menu')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+        <button onClick={() => {
+          soundManager.play('menu');
+          setShowSoundSettings(true);
+        }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
           Ustawienia
         </button>
-        <div style={{ marginTop: '20px', padding: '10px', border: '2px solid #77004d', borderRadius: '8px' }}>
-        <label style={{ color: '#d600cb', display: 'block', marginBottom: '10px' }}>Volume Test</label>
-        <input 
-          type="range" 
-          min="0" 
-          max="100" 
-          defaultValue="70"
-          onChange={(e) => soundManager.setVolume(e.target.value / 100)}
-          style={{ width: '100%', marginBottom: '10px' }}
-        />
-        <button 
-          onClick={() => soundManager.play('select')}
-          style={{ 
-            background: 'black', 
-            border: '2px solid #77004d', 
-            color: '#d600cb', 
-            padding: '5px 10px',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Test Sound
-        </button>
-      </div>
         {message && <div className="message">{message}</div>}
       </div>
     </div>
@@ -325,6 +305,86 @@ function App() {
       {gameState === 'waiting' && renderWaiting()}
       {gameState === 'playing' && renderGame()}
       {gameState === 'finished' && renderFinished()}
+       {/* Sound Settings Modal */}
+    {showSoundSettings && (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0,0,0,0.7)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000
+      }}>
+        <div style={{ 
+          background: 'black', 
+          border: '3px solid #77004d',
+          color: '#d600cb',
+          padding: '30px', 
+          borderRadius: '12px',
+          minWidth: '400px',
+          fontFamily: '"Press Start 2P", system-ui'
+        }}>
+          <h3 style={{ marginBottom: '20px', textAlign: 'center', color: '#d600cb' }}>Sound Settings</h3>
+          
+          {/* Master Volume */}
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <label>Master Volume</label>
+              <button 
+                onClick={() => soundManager.play('select')}
+                style={{ 
+                  background: 'black',
+                  border: '2px solid #77004d',
+                  color: '#d600cb',
+                  padding: '4px 8px', 
+                  fontSize: '8px',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Test
+              </button>
+            </div>
+            <input 
+              type="range" 
+              min="0" 
+              max="100" 
+              value={volumeValues.master}
+              onChange={(e) => {
+                const newValue = parseInt(e.target.value);
+                setVolumeValues(prev => ({ ...prev, master: newValue }));
+                soundManager.setVolume(newValue / 100);
+              }}
+              style={{ width: '100%', marginBottom: '5px' }}
+            />
+            <span style={{ fontSize: '10px', color: '#77004d' }}>
+              {volumeValues.master}%
+            </span>
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
+            <button 
+              onClick={() => setShowSoundSettings(false)}
+              style={{ 
+                background: 'black',
+                border: '3px solid #77004d',
+                color: '#77004d',
+                padding: '10px 20px', 
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontFamily: '"Press Start 2P", system-ui'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </div>
   );
 }
