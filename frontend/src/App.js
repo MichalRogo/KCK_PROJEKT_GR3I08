@@ -34,9 +34,10 @@ function App() {
   const connectToServer = () => {
     if (!nickname.trim()) {
       setMessage('Podaj swój nick!');
+      soundManager.play('error');
       return;
     }
-
+    soundManager.play('select');
     console.log('Łączenie z serwerem:', WEBSOCKET_URL);
     const ws = new WebSocket(WEBSOCKET_URL);
     
@@ -108,10 +109,12 @@ function App() {
         setGameResult(data.result);
         setMessage(data.message);
         setGameState('finished');
+        soundManager.play(data.result === 'win' ? 'win' : 'loss');
         break;
         
       case 'solution_incorrect':
         setMessage(data.message);
+        soundManager.play('error');
         setTimeout(() => setMessage(''), 5000); // Zwiększony czas wyświetlania
         break;
         
@@ -119,10 +122,12 @@ function App() {
         setMessage(data.message);
         setGameState('finished');
         setGameResult('win');
+        soundManager.play('win');
         break;
         
       case 'error':
         setMessage(`Błąd: ${data.message}`);
+        soundManager.play('error');
         break;
         
       default:
@@ -184,7 +189,7 @@ function App() {
         <button onClick={connectToServer} disabled={connectionStatus === 'connected'}>
           Dołącz do gry
         </button>
-        <button onClick={() => soundManager.play('test')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+        <button onClick={() => soundManager.play('select')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
           Ustawienia
         </button>
         {message && <div className="message">{message}</div>}
