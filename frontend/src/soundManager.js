@@ -2,7 +2,11 @@ class SoundManager {
   constructor() {
     this.sounds = {};
     this.initialized = false;
-    this.volume = 0.7;
+    this.volumes = {
+      master: 0.7,
+      effects: 0.8,
+      music: 0.5
+    };
     this.soundPaths = {
       select: '/sounds/select.mp3',
       error: '/sounds/error.mp3',
@@ -16,23 +20,52 @@ class SoundManager {
   async init() {
     if (this.initialized) return;
     
-    const savedVolume = localStorage.getItem('codeBattleVolume');
-    if (savedVolume) {
-      this.volume = parseFloat(savedVolume);
+    const savedVolumes = localStorage.getItem('codeBattleVolumes');
+    if (savedVolumes) {
+      this.volumes = { ...this.volumes, ...JSON.parse(savedVolumes) };
     }
     
     this.initialized = true;
-    console.log('Sound system initialized, volume:', this.volume);
+    console.log('Sound system initialized, volumes:', this.volumes);
   }
 
-  setVolume(volume) {
-    this.volume = Math.max(0, Math.min(1, volume));
-    localStorage.setItem('codeBattleVolume', this.volume.toString());
-    console.log('Volume set to:', this.volume);
+  setVolume(category, volume) {
+    this.volumes[category] = Math.max(0, Math.min(1, volume));
+    localStorage.setItem('codeBattleVolumes', JSON.stringify(this.volumes));
+    
+    this.updateAllVolumes();
+    console.log(`${category} volume set to:`, this.volumes[category]);
   }
 
-  getVolume() {
-    return this.volume;
+  getVolume(category) {
+    return this.volumes[category] || 0;
+  }
+
+  updateAllVolumes() {
+    Object.keys(this.sounds).forEach(id => {
+      this.updateSoundVolume(id);
+    });
+  }
+
+  updateSoundVolume(id) {
+    const sound = this.sounds[id];
+    if (sound && sound.audio) {
+      const category = this.getSoundCategory(id);
+      const categoryVolume = this.volumes[category] || 1.0;
+      const masterVolume = this.volumes.master || 1.0;
+      let baseVolume = 1.0;
+      
+      if (id === 'select') {
+        baseVolume = 0.4;
+      }
+      
+      sound.audio.volume = baseVolume * categoryVolume * masterVolume;
+    }
+  }
+
+  getSoundCategory(id) {
+    if (id === 'gamemusic') return 'music';
+    return 'effects'; // select, error, win, loss, menu
   }
 
   async loadSound(id) {
@@ -46,42 +79,61 @@ class SoundManager {
 
     const audio = new Audio(path);
     audio.preload = 'auto';
-    this.sounds[id] = audio;
-    return audio;
+    
+    const soundData = {
+      audio,
+      loaded: false
+    };
+    
+    this.sounds[id] = soundData;
+    
+    audio.addEventListener('canplaythrough', () => {
+      soundData.loaded = true;
+      this.updateSoundVolume(id);
+    });
+
+    audio.addEventListener('error', (e) => {
+      console.warn(`Failed to load sound: ${id}`, e);
+    });
+
+    return soundData;
   }
 
   async play(id) {
     if (!this.initialized) return;
     
-    let audio = this.sounds[id];
-    if (!audio) {
-      audio = await this.loadSound(id);
+    let sound = this.sounds[id];
+    if (!sound) {
+      sound = await this.loadSound(id);
     }
     
-    if (!audio) return;
+    if (!sound || !sound.audio || !sound.loaded) {
+      console.warn(`Sound not available: ${id}`);
+      return;
+    }
 
     try {
-      audio.volume = this.volume;
-      audio.currentTime = 0;
-      await audio.play();
-      console.log(`Played: ${id} at volume: ${this.volume}`);
+      this.updateSoundVolume(id);
+      sound.audio.currentTime = 0;
+      await sound.audio.play();
+      console.log(`Played: ${id}`);
     } catch (error) {
       console.warn(`Failed to play ${id}:`, error);
     }
   }
 
   async loop(id) {
-    let audio = this.sounds[id];
-    if (!audio) {
-      audio = await this.loadSound(id);
+    let sound = this.sounds[id];
+    if (!sound) {
+      sound = await this.loadSound(id);
     }
     
-    if (!audio) return;
+    if (!sound || !sound.audio) return;
 
-    audio.loop = true;
-    audio.volume = this.volume;
+    sound.audio.loop = true;
+    this.updateSoundVolume(id);
     try {
-      await audio.play();
+      await sound.audio.play();
       console.log(`Started looping: ${id}`);
     } catch (error) {
       console.warn(`Failed to loop ${id}:`, error);
@@ -89,15 +141,14 @@ class SoundManager {
   }
 
   stop(id) {
-    const audio = this.sounds[id];
-    if (audio) {
-      audio.pause();
-      audio.currentTime = 0;
-      audio.loop = false;
+    const sound = this.sounds[id];
+    if (sound && sound.audio) {
+      sound.audio.pause();
+      sound.audio.currentTime = 0;
+      sound.audio.loop = false;
       console.log(`Stopped: ${id}`);
     }
   }
-  
 }
 
 const soundManager = new SoundManager();
