@@ -37,7 +37,7 @@ function App() {
       soundManager.play('error');
       return;
     }
-    soundManager.play('select');
+    
     console.log('Łączenie z serwerem:', WEBSOCKET_URL);
     const ws = new WebSocket(WEBSOCKET_URL);
     
@@ -95,6 +95,7 @@ function App() {
         setMessage(`Gra rozpoczęta! Przeciwnik: ${data.opponent}`);
         setMyCode('// Napisz swoją funkcję tutaj\n');
         setOpponentCode('// Kod przeciwnika pojawi się tutaj\n');
+        soundManager.loop('gamemusic');
         break;
         
       case 'opponent_code_update':
@@ -110,6 +111,7 @@ function App() {
         setMessage(data.message);
         setGameState('finished');
         soundManager.play(data.result === 'win' ? 'win' : 'loss');
+        soundManager.stop('gamemusic');
         break;
         
       case 'solution_incorrect':
@@ -123,6 +125,7 @@ function App() {
         setGameState('finished');
         setGameResult('win');
         soundManager.play('win');
+        soundManager.stop('gamemusic');
         break;
         
       case 'error':
@@ -166,6 +169,7 @@ function App() {
     setMessage('');
     setMyCode('');
     setOpponentCode('');
+    soundManager.stop('gamemusic');
     if (socket) {
       socket.close();
     }
@@ -189,7 +193,7 @@ function App() {
         <button onClick={connectToServer} disabled={connectionStatus === 'connected'}>
           Dołącz do gry
         </button>
-        <button onClick={() => soundManager.play('select')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+        <button onClick={() => soundManager.play('menu')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
           Ustawienia
         </button>
         {message && <div className="message">{message}</div>}
