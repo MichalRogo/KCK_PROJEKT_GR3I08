@@ -79,12 +79,18 @@ function App() {
 
   const handleServerMessage = (data) => {
     console.log('Otrzymana wiadomość:', data);
-    
+
+    // Ignoruj niektóre wiadomości jeśli gra już się zakończyła
+    if (gameState === 'finished' && ['opponent_disconnected', 'opponent_code_update'].includes(data.type)) {
+      console.log('Ignorowanie wiadomości - gra już zakończona');
+      return;
+    }
+
     switch (data.type) {
       case 'queue_joined':
         setMessage(data.message);
         break;
-        
+
       case 'game_started':
         setGameState('playing');
         setTask(data.task);
@@ -93,36 +99,39 @@ function App() {
         setMyCode('// Napisz swoją funkcję tutaj\n');
         setOpponentCode('// Kod przeciwnika pojawi się tutaj\n');
         break;
-        
+
       case 'opponent_code_update':
         setOpponentCode(data.code);
         break;
-        
+
       case 'checking_solution':
         setMessage(data.message);
         break;
-        
+
       case 'game_result':
         setGameResult(data.result);
         setMessage(data.message);
         setGameState('finished');
         break;
-        
+
       case 'solution_incorrect':
         setMessage(data.message);
-        setTimeout(() => setMessage(''), 5000); // Zwiększony czas wyświetlania
+        setTimeout(() => setMessage(''), 5000);
         break;
-        
+
       case 'opponent_disconnected':
-        setMessage(data.message);
-        setGameState('finished');
-        setGameResult('win');
+        // Tylko jeśli gra nie jest zakończona
+        if (gameState !== 'finished') {
+          setMessage(data.message);
+          setGameState('finished');
+          setGameResult('win');
+        }
         break;
-        
+
       case 'error':
         setMessage(`Błąd: ${data.message}`);
         break;
-        
+
       default:
         console.log('Nieznana wiadomość:', data);
     }
