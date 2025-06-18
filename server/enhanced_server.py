@@ -254,24 +254,28 @@ class CodeBattleServer:
         room = self.find_player_room(client_id)
         if not room or room.winner or not room.game_started:
             return
-        
+
         room.increment_attempts(client_id)
         player = room.get_player(client_id)
-        
+
         # Informuj o rozpoczęciu sprawdzania
         await self.send_message(player['websocket'], {
             'type': 'checking_solution',
             'message': f'Sprawdzanie rozwiązania... (próba {player["attempts"]})'
         })
-        
+
         is_correct, error_msg = await self.test_c_code(code, room.current_task)
-        
+
         if is_correct:
             room.winner = client_id
             game_duration = asyncio.get_event_loop().time() - room.start_time
-            
+
             logger.info(f"Gra zakończona w pokoju {room.room_id}. Zwycięzca: {player['nickname']} w {game_duration:.1f}s")
-            
+
+            # Oznacz graczy jako "finished" aby nie otrzymywali więcej komunikatów
+            for p in room.players:
+                p['game_finished'] = True
+
             # Powiadom zwycięzcę
             await self.send_message(player['websocket'], {
                 'type': 'game_result',
@@ -280,7 +284,7 @@ class CodeBattleServer:
                 'attempts': player['attempts'],
                 'duration': game_duration
             })
-            
+
             # Powiadom przegranego
             opponent = room.get_opponent(client_id)
             if opponent:
@@ -376,18 +380,31 @@ int main() {{
         """Obsługuje rozłączenie gracza"""
         room = self.find_player_room(client_id)
         if room:
-            # Powiadom przeciwnika o rozłączeniu
-            opponent = room.get_opponent(client_id)
-            if opponent:
-                await self.send_message(opponent['websocket'], {
-                    'type': 'opponent_disconnected',
-                    'message': 'Przeciwnik się rozłączył. Wygrywasz przez walkower!'
-                })
-            
-            # Usuń pokój
-            if room.room_id in self.rooms:
-                del self.rooms[room.room_id]
-                logger.info(f"Pokój {room.room_id} został usunięty z powodu rozłączenia")
+            # Sprawdź czy gra już się zakończyła
+            if room.winner:
+                # Gra już zakończona - nie wysyłaj żadnych dodatkowych komunikatów
+                logger.info(f"Gracz {client_id} rozłączył się po zakończonej grze w pokoju {room.room_id}")
+
+                # Usuń gracza z pokoju
+                room.remove_player(client_id)
+
+                # Usuń pokój tylko jeśli nie ma już żadnych graczy
+                if len(room.players) == 0:
+                    del self.rooms[room.room_id]
+                    logger.info(f"Pokój {room.room_id} został usunięty - brak graczy")
+            else:
+                # Gra w trakcie - powiadom przeciwnika o rozłączeniu
+                opponent = room.get_opponent(client_id)
+                if opponent:
+                    await self.send_message(opponent['websocket'], {
+                        'type': 'opponent_disconnected',
+                        'message': 'Przeciwnik się rozłączył. Wygrywasz przez walkower!'
+                    })
+
+                # Usuń pokój
+                if room.room_id in self.rooms:
+                    del self.rooms[room.room_id]
+                    logger.info(f"Pokój {room.room_id} został usunięty z powodu rozłączenia podczas gry")
     
     def find_player_room(self, client_id: str) -> Optional[GameRoom]:
         for room in self.rooms.values():
