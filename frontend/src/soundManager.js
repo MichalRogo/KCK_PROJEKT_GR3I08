@@ -30,6 +30,7 @@ class SoundManager {
   }
 
   setVolume(category, volume) {
+    // Fix: Properly handle 0 values and ensure volume is between 0 and 1
     this.volumes[category] = Math.max(0, Math.min(1, volume));
     localStorage.setItem('codeBattleVolumes', JSON.stringify(this.volumes));
     
@@ -38,7 +39,8 @@ class SoundManager {
   }
 
   getVolume(category) {
-    return this.volumes[category] || 0;
+    // Fix: Use explicit undefined check to properly handle 0 values
+    return this.volumes[category] !== undefined ? this.volumes[category] : 0;
   }
 
   updateAllVolumes() {
@@ -51,8 +53,8 @@ class SoundManager {
     const sound = this.sounds[id];
     if (sound && sound.audio) {
       const category = this.getSoundCategory(id);
-      const categoryVolume = this.volumes[category] || 1.0;
-      const masterVolume = this.volumes.master || 1.0;
+      const categoryVolume = this.getVolume(category); // Use the fixed getVolume method
+      const masterVolume = this.getVolume('master'); // Use the fixed getVolume method
       let baseVolume = 1.0;
       
       if (id === 'select') {
@@ -60,6 +62,7 @@ class SoundManager {
       }
       
       sound.audio.volume = baseVolume * categoryVolume * masterVolume;
+      console.log(`Updated volume for ${id}: ${sound.audio.volume} (base: ${baseVolume}, category: ${categoryVolume}, master: ${masterVolume})`);
     }
   }
 
@@ -115,8 +118,10 @@ class SoundManager {
     try {
       this.updateSoundVolume(id);
       sound.audio.currentTime = 0;
+      
+      // Always try to play - let the browser handle 0 volume
       await sound.audio.play();
-      console.log(`Played: ${id}`);
+      console.log(`Played: ${id} at volume: ${sound.audio.volume}`);
     } catch (error) {
       console.warn(`Failed to play ${id}:`, error);
     }
@@ -133,8 +138,9 @@ class SoundManager {
     sound.audio.loop = true;
     this.updateSoundVolume(id);
     try {
+      // Always try to play - let the browser handle 0 volume
       await sound.audio.play();
-      console.log(`Started looping: ${id}`);
+      console.log(`Started looping: ${id} at volume: ${sound.audio.volume}`);
     } catch (error) {
       console.warn(`Failed to loop ${id}:`, error);
     }

@@ -21,20 +21,31 @@ function App() {
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
   const [showSoundSettings, setShowSoundSettings] = useState(false);
   const [volumeValues, setVolumeValues] = useState({
-  master: Math.round(soundManager.getVolume('master') * 100),
-  effects: Math.round(soundManager.getVolume('effects') * 100),
-  music: Math.round(soundManager.getVolume('music') * 100)
-  });
+  master: 70,
+  effects: 80,
+  music: 50
+});
   const socketRef = useRef(null);
 
   useEffect(() => {
-    soundManager.init();
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.close();
-      }
-    };
-  }, []);
+  const initializeApp = async () => {
+    await soundManager.init();
+    
+    setVolumeValues({
+      master: Math.round(soundManager.getVolume('master') * 100),
+      effects: Math.round(soundManager.getVolume('effects') * 100),
+      music: Math.round(soundManager.getVolume('music') * 100)
+    });
+  };
+  
+  initializeApp();
+  
+  return () => {
+    if (socketRef.current) {
+      socketRef.current.close();
+    }
+  };
+}, []);
 
   const connectToServer = () => {
     if (!nickname.trim()) {
